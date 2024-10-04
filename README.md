@@ -1,3 +1,5 @@
+Karlov Nickolay B05-328
+
 # atomata-and-regular-expressions
 
 
