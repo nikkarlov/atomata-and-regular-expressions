@@ -285,14 +285,28 @@ struct NormolizedAutomaticMachine {
       }
       ++ind_temp_vertex;
     }
+    std::string cycle_str;
     std::string result;
     for (auto&& edge : graph[0]) {
+      if (edge.first == 0) {
+        cycle_str += edge.second;
+        cycle_str += "+";
+      }
       if (edge.first == graph.size() - 1) {
         result += edge.second;
         result += "+";
       }
     }
-    result.pop_back();
+    if (!result.empty()) {
+      result.pop_back();
+    }
+    if (!cycle_str.empty()) {
+      cycle_str.pop_back();
+      if (result.empty()) {
+        return "(" + cycle_str + ")*";
+      }
+      return "(" + cycle_str + ")*$(" + result + ")";
+    }
     return result;
   };
 
