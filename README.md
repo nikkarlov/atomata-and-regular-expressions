@@ -10,3 +10,4 @@ Multiplication marks must be placed wherever they are intended (they must not be
 main functions and classes:
 AutomaticMachine - NKA(create to reg expr or graph) have method for create DKA(RemoveEps())
 NormolizedAutomaticMachine - DKA(create to method in AutomaticMachine) have method for create PDKA(DeleteTraslationWithMoreOneWord() and AlgoTomsan), Supplement PDKA(SupplementPDKA()), MIN PDKA(BuildMinPDKAByPDKA()) and reg expr(CreateRegularExpByDKA()), also have debugging method DfsOnString
+@ - epsilon translation
