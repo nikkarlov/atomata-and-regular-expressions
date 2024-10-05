@@ -51,15 +51,31 @@ struct AutomaticMachine {
       }
     }
     StackFinalFolding(stack_token, stack_operator);
-    this->root_vertex = stack_token.back().root_vertex;
+    *this = stack_token.back();
   }
 
-  void Clear() {
-    std::vector<bool> used(id_vertex + 1, false);
-    std::vector<Vertex*> RemoveVector;
-    DfsRemove(root_vertex, used, RemoveVector);
-    for (auto&& it : RemoveVector) {
-      delete it;
+  AutomaticMachine(const AutomaticMachine& other) : root_vertex(other.root_vertex) {
+    auto& a = const_cast<AutomaticMachine&>(other);
+    a.root_vertex = nullptr;
+  }
+
+  AutomaticMachine& operator=(const AutomaticMachine& other) {
+    if (root_vertex != other.root_vertex) {
+      root_vertex = other.root_vertex;
+    }
+    auto& a = const_cast<AutomaticMachine&>(other);
+    a.root_vertex = nullptr;
+    return *this;
+  }
+
+  ~AutomaticMachine() {
+    if (root_vertex != nullptr) {
+      std::vector<bool> used(id_vertex + 1, false);
+      std::vector<Vertex*> RemoveVector;
+      DfsRemove(root_vertex, used, RemoveVector);
+      for (auto&& it : RemoveVector) {
+        delete it;
+      }
     }
   }
 
@@ -202,6 +218,7 @@ struct AutomaticMachine {
       >& vec_graph,
       std::vector<bool>& vec_finished
   ) {
+    std::vector<std::set<std::pair<size_t, std::string>>> set_current_edge(vec_graph.size());
     std::vector<std::vector<EdgeHelp>> graph(vec_graph.size());
     std::vector<std::vector<EdgeHelp>> reverse_graph(vec_graph.size());
     std::map<size_t, bool> map_edge_delete;
@@ -209,6 +226,7 @@ struct AutomaticMachine {
     size_t id_edge = 0;
     for (size_t i = 0; i < vec_graph.size(); ++i) {
       for (size_t j = 0; j < vec_graph[i].size(); ++j) {
+        set_current_edge[i].emplace(vec_graph[i][j].first, vec_graph[i][j].second);
         graph[i].emplace_back(++id_edge, i, vec_graph[i][j].first, vec_graph[i][j].second);
         reverse_graph[vec_graph[i][j].first].emplace_back(id_edge, vec_graph[i][j].first, i, vec_graph[i][j].second);
         map_edge_delete[id_edge] = false;
@@ -225,7 +243,10 @@ struct AutomaticMachine {
       }
       for (size_t i = 0; i < reverse_graph[edge_eps.this_ver].size(); ++i) {
         auto temp_edge = reverse_graph[edge_eps.this_ver][i];
-        if (!map_edge_delete[temp_edge.id]) {
+        if (!map_edge_delete[temp_edge.id] &&
+            !set_current_edge[temp_edge.to_ver].contains({edge_eps.to_ver, temp_edge.str})
+            && !(temp_edge.to_ver == edge_eps.to_ver && temp_edge.str == "@")) {
+          set_current_edge[temp_edge.to_ver].emplace(edge_eps.to_ver, temp_edge.str);
           graph[temp_edge.to_ver].emplace_back(
               ++id_edge, temp_edge.to_ver, edge_eps.to_ver, temp_edge.str);
           reverse_graph[edge_eps.to_ver].emplace_back(
@@ -238,7 +259,10 @@ struct AutomaticMachine {
       }
       for (size_t i = 0; i < graph[edge_eps.to_ver].size(); ++i) {
         auto temp_edge = graph[edge_eps.to_ver][i];
-        if (!map_edge_delete[temp_edge.id]) {
+        if (!map_edge_delete[temp_edge.id] &&
+            !set_current_edge[edge_eps.this_ver].contains({temp_edge.to_ver, temp_edge.str})
+            && !(edge_eps.this_ver == temp_edge.to_ver && temp_edge.str == "@")) {
+          set_current_edge[edge_eps.this_ver].emplace(temp_edge.to_ver, temp_edge.str);
           graph[edge_eps.this_ver].emplace_back(
               ++id_edge, edge_eps.this_ver, temp_edge.to_ver, temp_edge.str);
           reverse_graph[temp_edge.to_ver].emplace_back(
@@ -249,6 +273,7 @@ struct AutomaticMachine {
           }
         }
       }
+      set_current_edge[edge_eps.this_ver].erase({edge_eps.to_ver, edge_eps.str});
       map_edge_delete[edge_eps.id] = true;
     }
     std::vector<std::vector<std::pair<size_t, std::string>>> new_graph(vec_graph.size());
@@ -347,6 +372,8 @@ struct AutomaticMachine {
     auto* new_root = new Vertex{id_vertex, false, {0},
                                 {{first.root_vertex, "@"},
                                  {second.root_vertex, "@"}}};
+    first.root_vertex = nullptr;
+    second.root_vertex = nullptr;
     return new_root;
   }
 
@@ -356,7 +383,10 @@ struct AutomaticMachine {
     DfsHelperToMultiplicationAutomaticMachineHelper(first.root_vertex,
                                                     second.root_vertex,
                                                     used);
-    return first.root_vertex;
+    auto* new_root = first.root_vertex;
+    first.root_vertex = nullptr;
+    second.root_vertex = nullptr;
+    return new_root;
   }
 
   void DfsHelperToMultiplicationAutomaticMachineHelper(Vertex* vertex,
@@ -378,6 +408,7 @@ struct AutomaticMachine {
     auto* new_root = new Vertex{id_vertex, true, 0, {{first.root_vertex, "@"}}};
     std::vector<bool> used(id_vertex + 1, false);
     DfsHelperToMultiplicationAutomaticMachineHelper(first.root_vertex, new_root, used);
+    first.root_vertex = nullptr;
     return new_root;
   }
 
@@ -385,7 +416,9 @@ struct AutomaticMachine {
     std::vector<bool> used(id_vertex + 1, false);
     DfsHelperToPlusKliniAutomaticMachineHelper(
         first.root_vertex, first.root_vertex, used);
-    return first.root_vertex;
+    auto* new_root = first.root_vertex;
+    first.root_vertex = nullptr;
+    return new_root;
   }
 
   void DfsHelperToPlusKliniAutomaticMachineHelper(Vertex* vertex,
@@ -481,7 +514,7 @@ struct AutomaticMachine {
     }
   }
 
-  std::map<char, size_t> map_priority =
+  inline static std::map<char, size_t> map_priority =
       {{'+', 0},
        {'$', 1},
        {'*', 2},
