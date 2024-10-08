@@ -20,3 +20,5 @@ AutomaticMachine - NKA(create to reg expr or graph) have method for create DKA(R
 NormolizedAutomaticMachine - DKA(create to method in AutomaticMachine) have method for create PDKA(DeleteTraslationWithMoreOneWord() and AlgoTomsan), Supplement PDKA(SupplementPDKA()), MIN PDKA(BuildMinPDKAByPDKA()) and reg expr(CreateRegularExpByDKA()), also have debugging method DfsOnString
 
 @ - eps translation in graph
+
+![image_2024-10-08_13-04-08](https://github.com/user-attachments/assets/f6508b7d-a5db-439c-8cd3-230ee6c75511)
