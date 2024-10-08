@@ -18,3 +18,5 @@ main functions and classes:
 AutomaticMachine - NKA(create to reg expr or graph) have method for create DKA(RemoveEps())
 
 NormolizedAutomaticMachine - DKA(create to method in AutomaticMachine) have method for create PDKA(DeleteTraslationWithMoreOneWord() and AlgoTomsan), Supplement PDKA(SupplementPDKA()), MIN PDKA(BuildMinPDKAByPDKA()) and reg expr(CreateRegularExpByDKA()), also have debugging method DfsOnString
+
+@ - eps translation in graph
